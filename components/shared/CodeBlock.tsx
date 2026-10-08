@@ -69,8 +69,8 @@ export function CodeBlock({
           >
             {copied ? (
               <>
-                <Check className="h-3.5 w-3.5 mr-1 text-[#00E5A0]" />
-                <span className="text-[#00E5A0]">Copied</span>
+                <Check className="h-3.5 w-3.5 mr-1 text-emerald-400" />
+                <span className="text-emerald-400">Copied</span>
               </>
             ) : (
               <>
@@ -86,7 +86,7 @@ export function CodeBlock({
             size="sm"
             className="h-8 px-2.5 text-xs border-white/10 text-muted-foreground hover:text-white hover:bg-white/10"
           >
-            <Download className="h-3.5 w-3.5 mr-1 text-[#00E5A0]" />
+            <Download className="h-3.5 w-3.5 mr-1 text-emerald-400" />
             Download .ino
           </Button>
         </div>

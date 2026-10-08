@@ -45,14 +45,14 @@ export default function ContactPage() {
                 <Textarea rows={4} placeholder="How can we help your robotics project or classroom?" required />
               </div>
 
-              <Button type="submit" variant="mint" className="w-full gap-2 shadow-md">
+              <Button type="submit" className="w-full gap-2 shadow-sm bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded-[10px] h-10 font-semibold">
                 <Send className="h-4 w-4" />
                 <span>Send Message</span>
               </Button>
             </form>
           ) : (
             <div className="text-center py-8 space-y-3">
-              <div className="h-12 w-12 rounded-full bg-[#00E5A0]/20 text-[#00E5A0] mx-auto flex items-center justify-center">
+              <div className="h-12 w-12 rounded-full bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0] mx-auto flex items-center justify-center">
                 <Mail className="h-6 w-6" />
               </div>
               <h3 className="font-bold text-foreground">Message Dispatched!</h3>

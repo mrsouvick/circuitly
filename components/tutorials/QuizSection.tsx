@@ -81,8 +81,8 @@ export function QuizSection({
             <span
               className={`text-lg font-bold px-3 py-1 rounded-xl border ${
                 score >= 80
-                  ? 'bg-[#00E5A0]/20 text-[#00E5A0] border-[#00E5A0]/40'
-                  : 'bg-amber-500/20 text-amber-400 border-amber-500/40'
+                  ? 'bg-[#ECFDF5] text-[#059669] border-[#A7F3D0]'
+                  : 'bg-amber-50 text-amber-700 border-amber-200'
               }`}
             >
               {score}% Score
@@ -104,8 +104,8 @@ export function QuizSection({
               className={`p-6 transition-all border ${
                 submitted
                   ? isCorrect
-                    ? 'border-[#00E5A0]/50 bg-[#00E5A0]/5'
-                    : 'border-destructive/50 bg-destructive/5'
+                    ? 'border-[#A7F3D0] bg-[#ECFDF5]/50'
+                    : 'border-destructive/30 bg-destructive/5'
                   : 'border-border/80 bg-card/40'
               }`}
             >
@@ -124,12 +124,12 @@ export function QuizSection({
                   let optionStyles = 'border-border/80 bg-secondary/30 hover:bg-secondary/60 text-muted-foreground';
 
                   if (isSelected && !submitted) {
-                    optionStyles = 'border-primary bg-primary/10 text-foreground font-semibold shadow-[0_0_15px_rgba(0,229,160,0.15)]';
+                    optionStyles = 'border-[#2563EB] bg-[#EFF6FF] text-[#0F172A] font-semibold';
                   } else if (submitted) {
                     if (optIndex === item.correct_answer) {
-                      optionStyles = 'border-[#00E5A0] bg-[#00E5A0]/20 text-[#00E5A0] font-semibold';
+                      optionStyles = 'border-[#059669] bg-[#ECFDF5] text-[#059669] font-semibold';
                     } else if (isSelected && isWrong) {
-                      optionStyles = 'border-destructive bg-destructive/20 text-destructive line-through';
+                      optionStyles = 'border-destructive/50 bg-destructive/10 text-destructive line-through';
                     }
                   }
 
@@ -143,7 +143,7 @@ export function QuizSection({
                     >
                       <span>{opt}</span>
                       {submitted && optIndex === item.correct_answer && (
-                        <CheckCircle className="h-4 w-4 text-[#00E5A0] shrink-0 ml-2" />
+                        <CheckCircle className="h-4 w-4 text-[#059669] shrink-0 ml-2" />
                       )}
                       {submitted && isSelected && isWrong && (
                         <XCircle className="h-4 w-4 text-destructive shrink-0 ml-2" />

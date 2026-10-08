@@ -2,18 +2,18 @@ export const SITE_CONFIG = {
   name: 'Circuitly',
   tagline: 'From Zero to Maker — Learn Arduino by Building',
   description: 'Interactive Arduino project tutorial platform for students, makers, and embedded engineers.',
-  url: process.env.NEXT_PUBLIC_APP_URL || 'https://circuitly.io',
+  url: process.env.NEXT_PUBLIC_APP_URL || 'https://circuitly.netlify.app',
   ogImage: '/og-image.png',
   author: 'Circuitly Labs',
   links: {
-    github: 'https://github.com/circuitly',
+    github: 'https://github.com/mrsouvick/circuitly',
     discord: 'https://discord.gg/circuitly',
     twitter: 'https://twitter.com/circuitly_io',
   },
 };
 
 export const DIFFICULTY_LEVELS = [
-  { label: 'Beginner', value: 'beginner', color: '#00E5A0' },
+  { label: 'Beginner', value: 'beginner', color: '#059669' },
   { label: 'Intermediate', value: 'intermediate', color: '#FFB84D' },
   { label: 'Advanced', value: 'advanced', color: '#FF6B6B' },
 ] as const;

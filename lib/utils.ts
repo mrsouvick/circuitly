@@ -33,13 +33,13 @@ export function formatPrice(amount: number): string {
 export function getDifficultyColor(difficulty: string): string {
   switch (difficulty.toLowerCase()) {
     case 'beginner':
-      return '#00E5A0'; // Mint Green
+      return '#059669'; // Emerald
     case 'intermediate':
-      return '#FFB84D'; // Amber
+      return '#D97706'; // Amber
     case 'advanced':
-      return '#FF6B6B'; // Coral
+      return '#DC2626'; // Red
     default:
-      return '#00E5A0';
+      return '#059669';
   }
 }
 

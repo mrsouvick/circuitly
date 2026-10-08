@@ -32,12 +32,12 @@ export function StepList({
       <div className="rounded-2xl border border-border/80 bg-card/60 p-5 space-y-3">
         <div className="flex items-center justify-between text-sm font-medium">
           <span className="flex items-center gap-2">
-            <CheckCircle2 className="h-4 w-4 text-[#00E5A0]" />
+            <CheckCircle2 className="h-4 w-4 text-[#059669]" />
             Build Steps Progress: {completedCount} of {steps.length} completed
           </span>
-          <span className="font-mono text-[#00E5A0] font-bold">{progressPercent}%</span>
+          <span className="font-mono text-[#059669] font-bold">{progressPercent}%</span>
         </div>
-        <Progress value={progressPercent} indicatorColor="bg-[#00E5A0]" />
+        <Progress value={progressPercent} indicatorColor="bg-[#059669]" />
       </div>
 
       {/* Steps List */}
@@ -51,7 +51,7 @@ export function StepList({
               onClick={() => handleStepToggle(step.order)}
               className={`group flex flex-col md:flex-row items-start gap-4 rounded-2xl border p-5 transition-all cursor-pointer ${
                 completed
-                  ? 'border-[#00E5A0]/40 bg-[#00E5A0]/5'
+                  ? 'border-[#A7F3D0] bg-[#ECFDF5]'
                   : 'border-border/80 bg-card/40 hover:border-border hover:bg-card/70'
               }`}
             >
@@ -59,7 +59,7 @@ export function StepList({
               <div
                 className={`mt-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-xl border transition-all ${
                   completed
-                    ? 'border-[#00E5A0] bg-[#00E5A0] text-black shadow-md shadow-[#00E5A0]/30'
+                    ? 'border-[#059669] bg-[#059669] text-white shadow-sm'
                     : 'border-border bg-secondary text-transparent group-hover:border-primary/60'
                 }`}
               >

@@ -33,7 +33,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#07070c]">
         <div className="flex flex-col items-center gap-3">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#00E5A0] border-t-transparent" />
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#2563EB] border-t-transparent" />
           <p className="text-xs text-muted-foreground font-mono">Verifying Administrative Clearance...</p>
         </div>
       </div>

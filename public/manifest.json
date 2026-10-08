@@ -4,8 +4,8 @@
   "description": "From Zero to Maker — Learn Arduino by Building",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0a0b12",
-  "theme_color": "#00E5A0",
+  "background_color": "#FAFBFC",
+  "theme_color": "#2563EB",
   "icons": [
     {
       "src": "/favicon.ico",
