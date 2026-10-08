@@ -1,0 +1,230 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Core Brand Tokens (Apple + Linear + Vercel light aesthetic) */
+  --bg-primary: #FAFBFC;
+  --bg-surface: #FFFFFF;
+  --bg-secondary: #F8FAFC;
+  
+  --primary-blue: #2563EB;
+  --primary-blue-hover: #1D4ED8;
+  --accent-cyan: #06B6D4;
+  --accent-soft-blue: #EFF6FF;
+
+  --text-primary: #0F172A;
+  --text-secondary: #64748B;
+  --text-muted: #94A3B8;
+
+  --border-light: #E2E8F0;
+  --border-hover: #CBD5E1;
+
+  --chip-bg: #ECFDF5;
+  --chip-text: #059669;
+
+  /* HSL Mappings for Tailwind compatibility */
+  --background: 210 20% 98.4%; /* #FAFBFC */
+  --foreground: 222 47% 11%;   /* #0F172A */
+
+  --card: 0 0% 100%;           /* #FFFFFF */
+  --card-foreground: 222 47% 11%;
+
+  --popover: 0 0% 100%;
+  --popover-foreground: 222 47% 11%;
+
+  --primary: 221 83% 53%;      /* #2563EB */
+  --primary-foreground: 0 0% 100%;
+
+  --secondary: 210 40% 96.1%;  /* #F1F5F9 */
+  --secondary-foreground: 222 47% 11%;
+
+  --muted: 210 40% 96.1%;
+  --muted-foreground: 215 16% 47%; /* #64748B */
+
+  --accent: 189 94% 43%;       /* #06B6D4 */
+  --accent-foreground: 0 0% 100%;
+
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+
+  --border: 214 32% 91%;       /* #E2E8F0 */
+  --input: 214 32% 91%;
+  --ring: 221 83% 53%;         /* #2563EB */
+
+  --radius: 10px;
+}
+
+@layer base {
+  * {
+    border-color: #E2E8F0;
+  }
+  
+  html {
+    scroll-behavior: smooth;
+    background-color: #FAFBFC;
+    color: #0F172A;
+  }
+
+  body {
+    background-color: #FAFBFC;
+    color: #0F172A;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 16px;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    color: #0F172A;
+    font-weight: 700;
+  }
+}
+
+/* Typography Utilities */
+.hero-title {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.08;
+  color: #0F172A;
+}
+
+.section-title {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: clamp(1.75rem, 3vw, 2.5rem);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+  color: #0F172A;
+}
+
+.eyebrow-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #64748B;
+  font-weight: 600;
+}
+
+/* Component Classes */
+.circuit-card {
+  background-color: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 16px;
+  padding: 28px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.circuit-card:hover {
+  transform: translateY(-4px);
+  border-color: #CBD5E1;
+  box-shadow: 0 12px 24px -6px rgba(15, 23, 42, 0.08), 0 4px 8px -2px rgba(15, 23, 42, 0.03);
+}
+
+.circuit-btn-primary {
+  background-color: #2563EB;
+  color: #FFFFFF;
+  font-weight: 600;
+  border-radius: 10px;
+  padding: 0.625rem 1.25rem;
+  box-shadow: 0 1px 2px 0 rgba(37, 99, 235, 0.2);
+  transition: all 0.2s ease-in-out;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.circuit-btn-primary:hover {
+  background-color: #1D4ED8;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+}
+
+.circuit-btn-outline {
+  background-color: #FFFFFF;
+  color: #0F172A;
+  border: 1px solid #E2E8F0;
+  font-weight: 600;
+  border-radius: 10px;
+  padding: 0.625rem 1.25rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  transition: all 0.2s ease-in-out;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.circuit-btn-outline:hover {
+  background-color: #F8FAFC;
+  border-color: #CBD5E1;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.06);
+}
+
+.icon-wrapper-blue {
+  width: 44px;
+  height: 44px;
+  border-radius: 9999px;
+  background-color: #EFF6FF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #2563EB;
+}
+
+.highlight-chip {
+  background-color: #ECFDF5;
+  color: #059669;
+  font-weight: 600;
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Subtle Hero Glow */
+.hero-glow-bg {
+  background: radial-gradient(ellipse 70% 60% at 50% -10%, rgba(37, 99, 235, 0.08), transparent 70%);
+}
+
+/* Scroll reveal helper */
+@keyframes revealFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-reveal {
+  animation: revealFadeUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Focus outline for accessibility */
+button:focus-visible, a:focus-visible, input:focus-visible {
+  outline: 2px solid #2563EB;
+  outline-offset: 2px;
+}
+
+/* Smooth code block appearance */
+pre, code {
+  font-family: 'JetBrains Mono', monospace;
+}

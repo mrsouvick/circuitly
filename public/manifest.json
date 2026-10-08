@@ -1,0 +1,28 @@
+{
+  "name": "Circuitly — Arduino Tutorial Platform",
+  "short_name": "Circuitly",
+  "description": "From Zero to Maker — Learn Arduino by Building",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0b12",
+  "theme_color": "#00E5A0",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Browse Tutorials",
+      "url": "/tutorials",
+      "description": "Explore all Arduino tutorials"
+    },
+    {
+      "name": "Wokwi Simulator",
+      "url": "/simulator",
+      "description": "Simulate Arduino circuits in-browser"
+    }
+  ]
+}
