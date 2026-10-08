@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { notFound, useParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -20,6 +20,7 @@ import {
   Award,
   ChevronRight,
   Send,
+  Loader2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -30,16 +31,21 @@ import { StepList } from '@/components/tutorials/StepList';
 import { TroubleshootingList } from '@/components/tutorials/TroubleshootingList';
 import { QuizSection } from '@/components/tutorials/QuizSection';
 import { TutorialCard } from '@/components/tutorials/TutorialCard';
-import { INITIAL_TUTORIALS, INITIAL_CATEGORIES } from '@/lib/seedData';
+import { INITIAL_TUTORIALS, INITIAL_CATEGORIES, Tutorial } from '@/lib/seedData';
 import { formatMinutes, formatPrice } from '@/lib/utils';
 import { useProgress } from '@/hooks/useProgress';
+import { useAuth } from '@/components/providers/AuthProvider';
 import { toast } from 'sonner';
 
 export default function TutorialDetailPage() {
   const params = useParams();
   const slug = params?.slug as string;
+  const { user } = useAuth();
 
-  const tutorial = INITIAL_TUTORIALS.find((t) => t.slug === slug);
+  const [tutorial, setTutorial] = useState<Tutorial | null>(() => {
+    return INITIAL_TUTORIALS.find((t) => t.slug === slug) || null;
+  });
+  const [loading, setLoading] = useState(!tutorial);
 
   const { isBookmarked, toggleBookmark, markTutorialComplete, isTutorialCompleted } = useProgress();
   const [commentText, setCommentText] = useState('');
@@ -60,6 +66,79 @@ export default function TutorialDetailPage() {
     },
   ]);
 
+  useEffect(() => {
+    if (tutorial) return;
+
+    async function fetchTutorial() {
+      try {
+        const res = await fetch('/api/admin/tutorials');
+        if (res.ok) {
+          const json = await res.json();
+          if (json.success && Array.isArray(json.data)) {
+            const found = json.data.find((t: Tutorial) => t.slug === slug);
+            if (found) {
+              setTutorial(found);
+            }
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load tutorial:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchTutorial();
+  }, [slug, tutorial]);
+
+  const handleShare = () => {
+    if (typeof window !== 'undefined') {
+      navigator.clipboard.writeText(window.location.href);
+      toast.success('Project URL copied to clipboard!');
+    }
+  };
+
+  const handleAddComment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!commentText.trim()) return;
+
+    const authorName = user?.full_name || user?.username || 'You (Maker)';
+    const avatarUrl = user?.avatar_url || 'https://api.dicebear.com/7.x/bottts/svg?seed=user_current';
+
+    const newComment = {
+      id: 'c-' + Date.now(),
+      author: authorName,
+      avatar: avatarUrl,
+      time: 'Just now',
+      text: commentText.trim(),
+    };
+    setCommentsList([newComment, ...commentsList]);
+
+    if (user?.id && tutorial?.id) {
+      try {
+        const { createClient } = await import('@/lib/supabase/client');
+        const supabase = createClient();
+        await supabase.from('comments').insert({
+          user_id: user.id,
+          tutorial_id: tutorial.id,
+          content: commentText.trim(),
+        });
+      } catch (err) {
+        console.error('Failed to save comment to database:', err);
+      }
+    }
+
+    setCommentText('');
+    toast.success('Comment posted successfully!');
+  };
+
+  if (loading) {
+    return (
+      <div className="flex h-96 items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   if (!tutorial) {
     return notFound();
   }
@@ -71,28 +150,6 @@ export default function TutorialDetailPage() {
   const relatedTutorials = INITIAL_TUTORIALS.filter(
     (t) => t.id !== tutorial.id && (t.category_id === tutorial.category_id || t.difficulty === tutorial.difficulty)
   ).slice(0, 3);
-
-  const handleShare = () => {
-    if (typeof window !== 'undefined') {
-      navigator.clipboard.writeText(window.location.href);
-      toast.success('Project URL copied to clipboard!');
-    }
-  };
-
-  const handleAddComment = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!commentText.trim()) return;
-    const newComment = {
-      id: 'c-' + Date.now(),
-      author: 'You (Student)',
-      avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=user_current',
-      time: 'Just now',
-      text: commentText.trim(),
-    };
-    setCommentsList([newComment, ...commentsList]);
-    setCommentText('');
-    toast.success('Comment posted successfully!');
-  };
 
   return (
     <div className="container py-8 space-y-10">

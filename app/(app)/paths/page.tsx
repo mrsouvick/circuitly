@@ -1,15 +1,44 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Route, Clock, BookOpen, CheckCircle, ArrowRight, Award } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { DifficultyBadge } from '@/components/shared/DifficultyBadge';
-import { INITIAL_PATHS, INITIAL_TUTORIALS } from '@/lib/seedData';
+import { INITIAL_PATHS, INITIAL_TUTORIALS, LearningPath, Tutorial } from '@/lib/seedData';
 
 export default function PathsIndexPage() {
+  const [pathsList, setPathsList] = useState<LearningPath[]>(INITIAL_PATHS);
+  const [tutorialsList, setTutorialsList] = useState<Tutorial[]>(INITIAL_TUTORIALS);
+
+  useEffect(() => {
+    async function loadPaths() {
+      try {
+        const [pRes, tRes] = await Promise.all([
+          fetch('/api/admin/paths'),
+          fetch('/api/admin/tutorials'),
+        ]);
+        if (pRes.ok) {
+          const pJson = await pRes.json();
+          if (pJson.success && Array.isArray(pJson.data) && pJson.data.length > 0) {
+            setPathsList(pJson.data);
+          }
+        }
+        if (tRes.ok) {
+          const tJson = await tRes.json();
+          if (tJson.success && Array.isArray(tJson.data) && tJson.data.length > 0) {
+            setTutorialsList(tJson.data);
+          }
+        }
+      } catch (err) {
+        // Fallback
+      }
+    }
+    loadPaths();
+  }, []);
+
   return (
     <div className="container py-8 space-y-8">
       {/* Header */}
@@ -27,8 +56,8 @@ export default function PathsIndexPage() {
 
       {/* Learning Paths Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {INITIAL_PATHS.map((path) => {
-          const tutorialsInPath = INITIAL_TUTORIALS.filter((t) =>
+        {pathsList.map((path) => {
+          const tutorialsInPath = tutorialsList.filter((t) =>
             path.tutorial_ids.includes(t.id)
           );
           const totalHours = Math.round(

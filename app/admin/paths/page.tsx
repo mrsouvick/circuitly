@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Route, Plus, Edit2, Trash2, BookOpen, Save } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -10,16 +10,16 @@ import { Select } from '@/components/ui/select';
 import { Dialog, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { DataTable, Column } from '@/components/admin/DataTable';
 import { DifficultyBadge } from '@/components/shared/DifficultyBadge';
-import { DataStore } from '@/lib/data/store';
 import { LearningPath, Tutorial } from '@/types';
-import { INITIAL_TUTORIALS } from '@/lib/seedData';
 import { slugify } from '@/lib/utils';
 import { toast } from 'sonner';
 
 export default function AdminPathsPage() {
-  const [paths, setPaths] = useState<LearningPath[]>(DataStore.getPaths());
+  const [paths, setPaths] = useState<LearningPath[]>([]);
+  const [tutorials, setTutorials] = useState<Tutorial[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingPath, setEditingPath] = useState<LearningPath | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Form
   const [title, setTitle] = useState('');
@@ -29,13 +29,46 @@ export default function AdminPathsPage() {
   const [difficulty, setDifficulty] = useState<LearningPath['difficulty']>('beginner');
   const [selectedTutorialIds, setSelectedTutorialIds] = useState<string[]>([]);
 
+  const loadData = async () => {
+    try {
+      setIsLoading(true);
+      const [pRes, tRes] = await Promise.all([
+        fetch('/api/admin/paths'),
+        fetch('/api/admin/tutorials'),
+      ]);
+
+      if (pRes.ok) {
+        const pJson = await pRes.json();
+        if (pJson.success && Array.isArray(pJson.data)) {
+          setPaths(pJson.data);
+        }
+      }
+
+      if (tRes.ok) {
+        const tJson = await tRes.json();
+        if (tJson.success && Array.isArray(tJson.data)) {
+          setTutorials(tJson.data);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to load paths data:', err);
+      toast.error('Failed to load learning paths');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
   const openCreateModal = () => {
     setEditingPath(null);
     setTitle('');
     setSlug('');
     setDescription('');
     setDifficulty('beginner');
-    setSelectedTutorialIds(INITIAL_TUTORIALS.slice(0, 5).map((t) => t.id));
+    setSelectedTutorialIds(tutorials.slice(0, 4).map((t) => t.id));
     setModalOpen(true);
   };
 
@@ -46,7 +79,7 @@ export default function AdminPathsPage() {
     setDescription(p.description);
     setCoverImage(p.cover_image);
     setDifficulty(p.difficulty);
-    setSelectedTutorialIds(p.tutorial_ids);
+    setSelectedTutorialIds(p.tutorial_ids || []);
     setModalOpen(true);
   };
 
@@ -56,15 +89,14 @@ export default function AdminPathsPage() {
     );
   };
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim() || !slug.trim()) {
       toast.error('Title and slug are required');
       return;
     }
 
-    const payload: LearningPath = {
-      id: editingPath?.id || 'path-' + Date.now(),
+    const payload: Partial<LearningPath> = {
       title,
       slug,
       description,
@@ -73,11 +105,26 @@ export default function AdminPathsPage() {
       tutorial_ids: selectedTutorialIds,
       is_published: true,
     };
+    if (editingPath?.id) {
+      payload.id = editingPath.id;
+    }
 
-    DataStore.savePath(payload);
-    setPaths(DataStore.getPaths());
-    setModalOpen(false);
-    toast.success(editingPath ? `Path "${title}" updated!` : `Path "${title}" created!`);
+    try {
+      const res = await fetch('/api/admin/paths', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (res.ok) {
+        await loadData();
+        setModalOpen(false);
+        toast.success(editingPath ? `Path "${title}" updated!` : `Path "${title}" created!`);
+      } else {
+        toast.error('Failed to save learning path');
+      }
+    } catch {
+      toast.error('Network error saving path');
+    }
   };
 
   const columns: Column<LearningPath>[] = [
@@ -215,7 +262,7 @@ export default function AdminPathsPage() {
               Select Included Projects ({selectedTutorialIds.length} chosen)
             </label>
             <div className="max-h-48 overflow-y-auto rounded-xl border border-border/80 bg-secondary/30 p-2 space-y-1.5">
-              {INITIAL_TUTORIALS.map((tut) => {
+              {tutorials.map((tut) => {
                 const isChecked = selectedTutorialIds.includes(tut.id);
                 return (
                   <label

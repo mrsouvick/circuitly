@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
@@ -19,6 +19,29 @@ import { toast } from 'sonner';
 export default function ShowcaseIndexPage() {
   const [showcases, setShowcases] = useState<Showcase[]>(INITIAL_SHOWCASES);
   const [likedIds, setLikedIds] = useState<string[]>([]);
+
+  useEffect(() => {
+    async function fetchLiveShowcases() {
+      try {
+        const res = await fetch('/api/admin/showcases');
+        if (res.ok) {
+          const json = await res.json();
+          if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+            // Only show approved and featured in public gallery
+            const approved = json.data.filter(
+              (s: Showcase) => s.status === 'approved' || s.status === 'featured'
+            );
+            if (approved.length > 0) {
+              setShowcases(approved);
+            }
+          }
+        }
+      } catch (err) {
+        // Fallback to static
+      }
+    }
+    fetchLiveShowcases();
+  }, []);
 
   const handleLike = (id: string) => {
     const isLiked = likedIds.includes(id);

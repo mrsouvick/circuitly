@@ -46,7 +46,7 @@ export default function NewShowcasePage() {
     setComponentsList(componentsList.filter((_, i) => i !== index));
   };
 
-  const onSubmit = (data: ShowcaseFormData) => {
+  const onSubmit = async (data: ShowcaseFormData) => {
     const formattedComponents = componentsList
       .filter((c) => c.name.trim().length > 0)
       .map((c) => ({
@@ -55,6 +55,29 @@ export default function NewShowcasePage() {
         price: 0,
         buy_url: '',
       }));
+
+    if (user?.id) {
+      try {
+        const { createClient } = await import('@/lib/supabase/client');
+        const supabase = createClient();
+        const { error } = await supabase.from('showcases').insert({
+          user_id: user.id,
+          title: data.title,
+          description: data.description,
+          image_url: data.image_url,
+          code: data.code,
+          components: formattedComponents,
+          status: 'approved',
+          likes_count: 0,
+        });
+
+        if (error) {
+          console.error('Supabase error inserting showcase:', error);
+        }
+      } catch (err) {
+        console.error('Error inserting showcase:', err);
+      }
+    }
 
     DataStore.saveShowcase({
       id: 'showcase-' + Date.now(),

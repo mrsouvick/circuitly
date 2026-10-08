@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
   Users,
@@ -18,90 +18,71 @@ import { DataTable, Column } from '@/components/admin/DataTable';
 import { Profile, UserRole } from '@/types';
 import { toast } from 'sonner';
 
-const SAMPLE_USERS: Profile[] = [
-  {
-    id: 'u-1',
-    username: 'circuit_admin',
-    full_name: 'Lead Instructor (Admin)',
-    avatar_url: 'https://api.dicebear.com/7.x/bottts/svg?seed=admin',
-    bio: 'Lead Platform Instructor',
-    role: 'admin',
-    status: 'active',
-    streak_count: 30,
-    last_active_at: new Date().toISOString(),
-    created_at: '2024-01-01T00:00:00Z',
-    updated_at: '2024-01-01T00:00:00Z',
-  },
-  {
-    id: 'u-2',
-    username: 'elena_rostova',
-    full_name: 'Elena Rostova',
-    avatar_url: 'https://api.dicebear.com/7.x/bottts/svg?seed=elena',
-    bio: 'High school robotics team captain',
-    role: 'user',
-    status: 'active',
-    streak_count: 14,
-    last_active_at: new Date().toISOString(),
-    created_at: '2024-01-15T00:00:00Z',
-    updated_at: '2024-01-15T00:00:00Z',
-  },
-  {
-    id: 'u-3',
-    username: 'marcus_vance',
-    full_name: 'Marcus Vance',
-    avatar_url: 'https://api.dicebear.com/7.x/bottts/svg?seed=marcus',
-    bio: 'Maker community lead',
-    role: 'moderator',
-    status: 'active',
-    streak_count: 8,
-    last_active_at: new Date().toISOString(),
-    created_at: '2024-02-01T00:00:00Z',
-    updated_at: '2024-02-01T00:00:00Z',
-  },
-  {
-    id: 'u-4',
-    username: 'spam_bot99',
-    full_name: 'Crypt0 Spammer',
-    avatar_url: 'https://api.dicebear.com/7.x/bottts/svg?seed=spambot',
-    bio: 'Automated referral promoter',
-    role: 'user',
-    status: 'banned',
-    streak_count: 0,
-    last_active_at: '2024-02-10T00:00:00Z',
-    created_at: '2024-02-10T00:00:00Z',
-    updated_at: '2024-02-10T00:00:00Z',
-  },
-  {
-    id: 'u-5',
-    username: 'alex_rivera',
-    full_name: 'Alex Rivera',
-    avatar_url: 'https://api.dicebear.com/7.x/bottts/svg?seed=alex',
-    bio: 'Physics undergraduate',
-    role: 'user',
-    status: 'active',
-    streak_count: 5,
-    last_active_at: new Date().toISOString(),
-    created_at: '2024-02-12T00:00:00Z',
-    updated_at: '2024-02-12T00:00:00Z',
-  },
-];
-
 export default function AdminUsersPage() {
-  const [users, setUsers] = useState<Profile[]>(SAMPLE_USERS);
+  const [users, setUsers] = useState<Profile[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const handleRoleChange = (id: string, newRole: UserRole) => {
-    setUsers((prev) =>
-      prev.map((u) => (u.id === id ? { ...u, role: newRole } : u))
-    );
-    toast.success(`Role changed to ${newRole}`);
+  const loadUsers = async () => {
+    try {
+      setIsLoading(true);
+      const res = await fetch('/api/admin/users');
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && Array.isArray(json.data)) {
+          setUsers(json.data);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to load users:', err);
+      toast.error('Failed to load live users from database');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleToggleBan = (id: string, currentStatus: string) => {
+  useEffect(() => {
+    loadUsers();
+  }, []);
+
+  const handleRoleChange = async (id: string, newRole: UserRole) => {
+    try {
+      const res = await fetch('/api/admin/users', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, role: newRole }),
+      });
+      if (res.ok) {
+        setUsers((prev) =>
+          prev.map((u) => (u.id === id ? { ...u, role: newRole } : u))
+        );
+        toast.success(`Role changed to ${newRole} in database`);
+      } else {
+        toast.error('Failed to update role');
+      }
+    } catch {
+      toast.error('Network error updating role');
+    }
+  };
+
+  const handleToggleBan = async (id: string, currentStatus: string) => {
     const nextStatus = currentStatus === 'active' ? 'banned' : 'active';
-    setUsers((prev) =>
-      prev.map((u) => (u.id === id ? { ...u, status: nextStatus as Profile['status'] } : u))
-    );
-    toast.success(nextStatus === 'banned' ? 'User banned from platform' : 'User unbanned');
+    try {
+      const res = await fetch('/api/admin/users', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, status: nextStatus }),
+      });
+      if (res.ok) {
+        setUsers((prev) =>
+          prev.map((u) => (u.id === id ? { ...u, status: nextStatus as Profile['status'] } : u))
+        );
+        toast.success(nextStatus === 'banned' ? 'User banned from platform' : 'User unbanned');
+      } else {
+        toast.error('Failed to update user status');
+      }
+    } catch {
+      toast.error('Network error updating status');
+    }
   };
 
   const handleImpersonate = (username: string) => {

@@ -205,24 +205,21 @@ export const DataStore = {
 
   // Admin Overview Stats
   getAdminStats: () => {
-    const totalUsers = 12480;
     const publishedTutorials = tutorials.filter((t) => t.is_published).length;
     const draftTutorials = tutorials.filter((t) => !t.is_published).length;
     const totalShowcases = showcases.length;
     const pendingShowcases = showcases.filter((s) => s.status === 'pending').length;
-    const activeUsers7d = 3420;
-    const activeUsers30d = 8900;
-    const totalCompletions = tutorials.reduce((acc, t) => acc + t.completions_count, 0);
+    const totalCompletions = tutorials.reduce((acc, t) => acc + (t.completions_count || 0), 0);
 
     return {
-      totalUsers,
+      totalUsers: 3,
       totalTutorials: tutorials.length,
       publishedTutorials,
       draftTutorials,
       totalShowcases,
       pendingShowcases,
-      activeUsers7d,
-      activeUsers30d,
+      activeUsers7d: 3,
+      activeUsers30d: 3,
       totalCompletions,
     };
   },

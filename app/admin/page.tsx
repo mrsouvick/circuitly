@@ -1,7 +1,8 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { Tutorial } from '@/types';
 import {
   Users,
   BookOpen,
@@ -74,19 +75,78 @@ const DIFFICULTY_PIE = [
 ];
 
 export default function AdminDashboardPage() {
-  const stats = DataStore.getAdminStats();
-  const topTutorials = [...INITIAL_TUTORIALS]
-    .sort((a, b) => b.views_count - a.views_count)
-    .slice(0, 5);
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    totalTutorials: 0,
+    publishedTutorials: 0,
+    draftTutorials: 0,
+    totalShowcases: 0,
+    pendingShowcases: 0,
+    activeUsers7d: 0,
+    activeUsers30d: 0,
+    totalCompletions: 0,
+  });
+  const [topTutorials, setTopTutorials] = useState<Tutorial[]>([]);
+  const [difficultyCounts, setDifficultyCounts] = useState({ beginner: 0, intermediate: 0, advanced: 0 });
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const [statsRes, tutRes] = await Promise.all([
+          fetch('/api/admin/stats'),
+          fetch('/api/admin/tutorials'),
+        ]);
+
+        if (statsRes.ok) {
+          const sJson = await statsRes.json();
+          if (sJson.success && sJson.data) {
+            setStats(sJson.data);
+          }
+        }
+
+        if (tutRes.ok) {
+          const tJson = await tutRes.json();
+          if (tJson.success && Array.isArray(tJson.data)) {
+            const list: Tutorial[] = tJson.data;
+            const sorted = [...list].sort((a, b) => (b.views_count || 0) - (a.views_count || 0));
+            setTopTutorials(sorted.slice(0, 5));
+
+            const beg = list.filter((t) => t.difficulty === 'beginner').length;
+            const inter = list.filter((t) => t.difficulty === 'intermediate').length;
+            const adv = list.filter((t) => t.difficulty === 'advanced').length;
+            setDifficultyCounts({ beginner: beg, intermediate: inter, advanced: adv });
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load live admin data:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    loadData();
+  }, []);
+
+  const liveDifficultyPie = [
+    { name: 'Beginner', value: difficultyCounts.beginner || 1, color: '#00E5A0' },
+    { name: 'Intermediate', value: difficultyCounts.intermediate || 1, color: '#FFB84D' },
+    { name: 'Advanced', value: difficultyCounts.advanced || 1, color: '#FF6B6B' },
+  ];
 
   return (
     <div className="space-y-8">
       {/* Overview Header & Quick Actions */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-2 border-b border-border/60">
         <div>
-          <h1 className="text-3xl font-extrabold text-foreground">
-            Platform Command Center
-          </h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-3xl font-extrabold text-foreground">
+              Platform Command Center
+            </h1>
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              Live DB
+            </span>
+          </div>
           <p className="text-xs text-muted-foreground">
             Real-time telemetry, moderation queues, student engagement, and curriculum management.
           </p>
@@ -259,7 +319,7 @@ export default function AdminDashboardPage() {
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
-                  data={DIFFICULTY_PIE}
+                  data={liveDifficultyPie}
                   cx="50%"
                   cy="50%"
                   innerRadius={60}
@@ -267,7 +327,7 @@ export default function AdminDashboardPage() {
                   paddingAngle={5}
                   dataKey="value"
                 >
-                  {DIFFICULTY_PIE.map((entry, index) => (
+                  {liveDifficultyPie.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
@@ -282,7 +342,7 @@ export default function AdminDashboardPage() {
             </ResponsiveContainer>
           </CardContent>
           <div className="flex justify-center gap-6 text-xs text-muted-foreground pt-2">
-            {DIFFICULTY_PIE.map((item) => (
+            {liveDifficultyPie.map((item) => (
               <div key={item.name} className="flex items-center gap-1.5 font-medium">
                 <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: item.color }} />
                 <span>{item.name}: {item.value}</span>

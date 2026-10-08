@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   FolderTree,
   Plus,
@@ -16,15 +16,15 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { DataTable, Column } from '@/components/admin/DataTable';
-import { DataStore } from '@/lib/data/store';
 import { Category } from '@/types';
 import { slugify } from '@/lib/utils';
 import { toast } from 'sonner';
 
 export default function AdminCategoriesPage() {
-  const [categories, setCategories] = useState<Category[]>(DataStore.getCategories());
+  const [categories, setCategories] = useState<Category[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Form State
   const [name, setName] = useState('');
@@ -32,6 +32,28 @@ export default function AdminCategoriesPage() {
   const [description, setDescription] = useState('');
   const [color, setColor] = useState('#00E5A0');
   const [icon, setIcon] = useState('Cpu');
+
+  const loadCategories = async () => {
+    try {
+      setIsLoading(true);
+      const res = await fetch('/api/admin/categories');
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && Array.isArray(json.data)) {
+          setCategories(json.data);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to load categories:', err);
+      toast.error('Failed to load live categories');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadCategories();
+  }, []);
 
   const openCreateModal = () => {
     setEditingCategory(null);
@@ -53,15 +75,14 @@ export default function AdminCategoriesPage() {
     setModalOpen(true);
   };
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !slug.trim()) {
       toast.error('Name and slug are required');
       return;
     }
 
-    const payload: Category = {
-      id: editingCategory?.id || 'cat-' + Date.now(),
+    const payload: Partial<Category> = {
       name,
       slug,
       description,
@@ -69,22 +90,42 @@ export default function AdminCategoriesPage() {
       color,
       order_index: editingCategory?.order_index || categories.length + 1,
     };
+    if (editingCategory?.id) {
+      payload.id = editingCategory.id;
+    }
 
-    DataStore.saveCategory(payload);
-    setCategories(DataStore.getCategories());
-    setModalOpen(false);
-    toast.success(
-      editingCategory
-        ? `Category "${name}" updated!`
-        : `Category "${name}" created!`
-    );
+    try {
+      const res = await fetch('/api/admin/categories', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (res.ok) {
+        await loadCategories();
+        setModalOpen(false);
+        toast.success(
+          editingCategory ? `Category "${name}" updated!` : `Category "${name}" created!`
+        );
+      } else {
+        toast.error('Failed to save category');
+      }
+    } catch {
+      toast.error('Network error saving category');
+    }
   };
 
-  const handleDelete = (id: string, catName: string) => {
-    if (confirm(`Are you sure you want to delete category "${catName}"?`)) {
-      DataStore.deleteCategory(id);
-      setCategories(DataStore.getCategories());
-      toast.success(`Category "${catName}" deleted`);
+  const handleDelete = async (id: string, catName: string) => {
+    if (!confirm(`Are you sure you want to delete category "${catName}"?`)) return;
+    try {
+      const res = await fetch(`/api/admin/categories?id=${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        setCategories((prev) => prev.filter((c) => c.id !== id));
+        toast.success(`Category "${catName}" deleted from database`);
+      } else {
+        toast.error('Failed to delete category');
+      }
+    } catch {
+      toast.error('Network error deleting category');
     }
   };
 

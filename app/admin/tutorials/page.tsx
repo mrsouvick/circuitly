@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
@@ -11,36 +11,73 @@ import {
   ExternalLink,
   CheckCircle,
   Eye,
+  RefreshCw,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DataTable, Column } from '@/components/admin/DataTable';
 import { DifficultyBadge } from '@/components/shared/DifficultyBadge';
-import { DataStore } from '@/lib/data/store';
 import { Tutorial } from '@/types';
 import { INITIAL_CATEGORIES } from '@/lib/seedData';
 import { toast } from 'sonner';
 
 export default function AdminTutorialsListPage() {
-  const [tutorials, setTutorials] = useState<Tutorial[]>(
-    DataStore.getAllTutorialsAdmin()
-  );
+  const [tutorials, setTutorials] = useState<Tutorial[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const handleDelete = (id: string, title: string) => {
-    if (confirm(`Are you sure you want to delete tutorial "${title}"?`)) {
-      DataStore.deleteTutorial(id);
-      setTutorials(DataStore.getAllTutorialsAdmin());
-      toast.success(`Deleted "${title}"`);
+  const loadTutorials = async () => {
+    try {
+      setIsLoading(true);
+      const res = await fetch('/api/admin/tutorials');
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && Array.isArray(json.data)) {
+          setTutorials(json.data);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to load tutorials:', err);
+      toast.error('Failed to load live tutorials');
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleTogglePublish = (id: string, currentStatus: boolean) => {
-    const tut = tutorials.find((t) => t.id === id);
-    if (tut) {
-      DataStore.saveTutorial({ ...tut, is_published: !currentStatus });
-      setTutorials(DataStore.getAllTutorialsAdmin());
-      toast.success(
-        !currentStatus ? 'Tutorial published live' : 'Tutorial converted to draft'
-      );
+  useEffect(() => {
+    loadTutorials();
+  }, []);
+
+  const handleDelete = async (id: string, title: string) => {
+    if (!confirm(`Are you sure you want to delete tutorial "${title}" from the database?`)) return;
+    try {
+      const res = await fetch(`/api/admin/tutorials?id=${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        setTutorials((prev) => prev.filter((t) => t.id !== id));
+        toast.success(`Deleted "${title}"`);
+      } else {
+        toast.error('Failed to delete tutorial');
+      }
+    } catch {
+      toast.error('Network error deleting tutorial');
+    }
+  };
+
+  const handleTogglePublish = async (id: string, currentStatus: boolean) => {
+    try {
+      const res = await fetch('/api/admin/tutorials', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, is_published: !currentStatus }),
+      });
+      if (res.ok) {
+        setTutorials((prev) =>
+          prev.map((t) => (t.id === id ? { ...t, is_published: !currentStatus } : t))
+        );
+        toast.success(!currentStatus ? 'Tutorial published live' : 'Tutorial converted to draft');
+      } else {
+        toast.error('Failed to update status');
+      }
+    } catch {
+      toast.error('Network error updating status');
     }
   };
 

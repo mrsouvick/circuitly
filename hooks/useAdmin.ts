@@ -8,14 +8,18 @@ export function useAdmin() {
   const { user, isAdmin } = useAuth();
 
   const logAction = (action: string, entityType: string, entityId: string, details: Record<string, unknown> = {}) => {
-    // In production, persists to audit_logs table
     console.log(`[AUDIT LOG] ${action} on ${entityType}:${entityId} by admin ${user?.username}`, details);
   };
 
-  const deleteTutorial = (id: string, title: string) => {
+  const deleteTutorial = async (id: string, title: string) => {
     if (!isAdmin) {
       toast.error('Unauthorized: Admin access required');
       return false;
+    }
+    try {
+      await fetch(`/api/admin/tutorials?id=${id}`, { method: 'DELETE' });
+    } catch {
+      // fallback
     }
     DataStore.deleteTutorial(id);
     logAction('DELETE_TUTORIAL', 'tutorial', id, { title });
@@ -23,10 +27,19 @@ export function useAdmin() {
     return true;
   };
 
-  const updateShowcaseStatus = (id: string, status: 'approved' | 'featured' | 'rejected', title: string) => {
+  const updateShowcaseStatus = async (id: string, status: 'approved' | 'featured' | 'rejected', title: string) => {
     if (!isAdmin) {
       toast.error('Unauthorized: Admin access required');
       return false;
+    }
+    try {
+      await fetch('/api/admin/showcases', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, status }),
+      });
+    } catch {
+      // fallback
     }
     DataStore.updateShowcaseStatus(id, status);
     logAction('MODERATE_SHOWCASE', 'showcase', id, { status, title });

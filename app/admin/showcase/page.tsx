@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import {
   Sparkles,
@@ -14,31 +14,74 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Dialog, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { DataStore } from '@/lib/data/store';
 import { Showcase } from '@/types';
 import { toast } from 'sonner';
 
 export default function AdminShowcaseModerationPage() {
-  const [showcases, setShowcases] = useState<Showcase[]>(DataStore.getAllShowcasesAdmin());
+  const [showcases, setShowcases] = useState<Showcase[]>([]);
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [previewItem, setPreviewItem] = useState<Showcase | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const loadShowcases = async () => {
+    try {
+      setIsLoading(true);
+      const res = await fetch('/api/admin/showcases');
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && Array.isArray(json.data)) {
+          setShowcases(json.data);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to load showcases:', err);
+      toast.error('Failed to load live showcases');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadShowcases();
+  }, []);
 
   const filtered = showcases.filter((s) => {
     if (statusFilter === 'all') return true;
     return s.status === statusFilter;
   });
 
-  const handleUpdateStatus = (id: string, newStatus: Showcase['status']) => {
-    DataStore.updateShowcaseStatus(id, newStatus);
-    setShowcases(DataStore.getAllShowcasesAdmin());
-    toast.success(`Showcase status changed to ${newStatus}`);
+  const handleUpdateStatus = async (id: string, newStatus: Showcase['status']) => {
+    try {
+      const res = await fetch('/api/admin/showcases', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, status: newStatus }),
+      });
+      if (res.ok) {
+        setShowcases((prev) =>
+          prev.map((s) => (s.id === id ? { ...s, status: newStatus } : s))
+        );
+        toast.success(`Showcase status updated to ${newStatus} in database`);
+      } else {
+        toast.error('Failed to update status');
+      }
+    } catch {
+      toast.error('Network error updating status');
+    }
   };
 
-  const handleDelete = (id: string) => {
-    if (confirm('Delete this showcase post permanently?')) {
-      DataStore.deleteShowcase(id);
-      setShowcases(DataStore.getAllShowcasesAdmin());
-      toast.success('Showcase removed');
+  const handleDelete = async (id: string) => {
+    if (!confirm('Delete this showcase post permanently from database?')) return;
+    try {
+      const res = await fetch(`/api/admin/showcases?id=${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        setShowcases((prev) => prev.filter((s) => s.id !== id));
+        toast.success('Showcase removed from database');
+      } else {
+        toast.error('Failed to delete showcase');
+      }
+    } catch {
+      toast.error('Network error deleting showcase');
     }
   };
 

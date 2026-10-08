@@ -1,27 +1,49 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Award, Plus, Edit2, Sparkles, Save } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { DataTable, Column } from '@/components/admin/DataTable';
-import { DataStore } from '@/lib/data/store';
 import { Badge } from '@/types';
 import { slugify } from '@/lib/utils';
 import { toast } from 'sonner';
 
 export default function AdminBadgesPage() {
-  const [badges, setBadges] = useState<Badge[]>(DataStore.getBadges());
+  const [badges, setBadges] = useState<Badge[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingBadge, setEditingBadge] = useState<Badge | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const [name, setName] = useState('');
   const [slug, setSlug] = useState('');
   const [description, setDescription] = useState('');
   const [color, setColor] = useState('#00E5A0');
   const [threshold, setThreshold] = useState(1);
+
+  const loadBadges = async () => {
+    try {
+      setIsLoading(true);
+      const res = await fetch('/api/admin/badges');
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && Array.isArray(json.data)) {
+          setBadges(json.data);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to load badges:', err);
+      toast.error('Failed to load live badges');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadBadges();
+  }, []);
 
   const openCreate = () => {
     setEditingBadge(null);
@@ -43,15 +65,14 @@ export default function AdminBadgesPage() {
     setModalOpen(true);
   };
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !slug.trim()) {
       toast.error('Badge name and slug are required');
       return;
     }
 
-    const payload: Badge = {
-      id: editingBadge?.id || 'badge-' + Date.now(),
+    const payload: Partial<Badge> = {
       name,
       slug,
       description,
@@ -62,11 +83,26 @@ export default function AdminBadgesPage() {
         threshold: Number(threshold),
       },
     };
+    if (editingBadge?.id) {
+      payload.id = editingBadge.id;
+    }
 
-    DataStore.saveBadge(payload);
-    setBadges(DataStore.getBadges());
-    setModalOpen(false);
-    toast.success(editingBadge ? `Badge "${name}" updated!` : `Badge "${name}" created!`);
+    try {
+      const res = await fetch('/api/admin/badges', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (res.ok) {
+        await loadBadges();
+        setModalOpen(false);
+        toast.success(editingBadge ? `Badge "${name}" updated!` : `Badge "${name}" created!`);
+      } else {
+        toast.error('Failed to save badge');
+      }
+    } catch {
+      toast.error('Network error saving badge');
+    }
   };
 
   const columns: Column<Badge>[] = [

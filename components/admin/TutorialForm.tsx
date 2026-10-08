@@ -104,7 +104,7 @@ export function TutorialForm({ initialTutorial, isEditing = false }: TutorialFor
     }
   };
 
-  const handleSave = (publishState = isPublished) => {
+  const handleSave = async (publishState = isPublished) => {
     if (!title.trim() || !slug.trim()) {
       toast.error('Title and slug are required');
       return;
@@ -135,13 +135,30 @@ export function TutorialForm({ initialTutorial, isEditing = false }: TutorialFor
       updated_at: new Date().toISOString(),
     };
 
-    DataStore.saveTutorial(payload);
-    toast.success(
-      isEditing
-        ? `Tutorial "${title}" updated successfully!`
-        : `Tutorial "${title}" created and saved!`
-    );
-    router.push('/admin/tutorials');
+    try {
+      const res = await fetch('/api/admin/tutorials', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (res.ok) {
+        DataStore.saveTutorial(payload);
+        toast.success(
+          isEditing
+            ? `Tutorial "${title}" updated successfully in database!`
+            : `Tutorial "${title}" created and published!`
+        );
+        router.push('/admin/tutorials');
+      } else {
+        const errJson = await res.json();
+        toast.error(errJson.error || 'Failed to save to database');
+      }
+    } catch (err) {
+      // Fallback
+      DataStore.saveTutorial(payload);
+      toast.success('Saved tutorial locally');
+      router.push('/admin/tutorials');
+    }
   };
 
   // Component Helpers

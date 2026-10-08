@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Search, Filter, SlidersHorizontal, BookOpen } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -8,10 +8,39 @@ import { Select } from '@/components/ui/select';
 import { TutorialCard } from '@/components/tutorials/TutorialCard';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { TutorialCardSkeleton } from '@/components/shared/LoadingShimmer';
-import { INITIAL_CATEGORIES, INITIAL_TUTORIALS, Tutorial } from '@/lib/seedData';
+import { INITIAL_CATEGORIES, INITIAL_TUTORIALS, Tutorial, Category } from '@/lib/seedData';
 import { useDebounce } from '@/hooks/useDebounce';
 
 export default function TutorialsCatalogPage() {
+  const [tutorialsList, setTutorialsList] = useState<Tutorial[]>(INITIAL_TUTORIALS);
+  const [categoriesList, setCategoriesList] = useState<Category[]>(INITIAL_CATEGORIES);
+
+  useEffect(() => {
+    async function fetchLiveCatalog() {
+      try {
+        const [tutRes, catRes] = await Promise.all([
+          fetch('/api/admin/tutorials'),
+          fetch('/api/admin/categories'),
+        ]);
+        if (tutRes.ok) {
+          const tJson = await tutRes.json();
+          if (tJson.success && Array.isArray(tJson.data) && tJson.data.length > 0) {
+            setTutorialsList(tJson.data);
+          }
+        }
+        if (catRes.ok) {
+          const cJson = await catRes.json();
+          if (cJson.success && Array.isArray(cJson.data) && cJson.data.length > 0) {
+            setCategoriesList(cJson.data);
+          }
+        }
+      } catch (err) {
+        // Fallback to static
+      }
+    }
+    fetchLiveCatalog();
+  }, []);
+
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSearch = useDebounce(searchQuery, 250);
 
@@ -22,11 +51,11 @@ export default function TutorialsCatalogPage() {
 
   // Filter tutorials
   const filteredTutorials = useMemo(() => {
-    let list: Tutorial[] = [...INITIAL_TUTORIALS];
+    let list: Tutorial[] = [...tutorialsList];
 
     // Category filter
     if (selectedCategory !== 'all') {
-      const cat = INITIAL_CATEGORIES.find((c) => c.slug === selectedCategory);
+      const cat = categoriesList.find((c) => c.slug === selectedCategory);
       if (cat) {
         list = list.filter((t) => t.category_id === cat.id);
       }
