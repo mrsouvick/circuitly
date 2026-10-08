@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Logo } from '@/components/shared/Logo';
-import { Send, Heart, Github, Twitter, MessageSquare } from 'lucide-react';
+import { Send, Heart, Github, Twitter, MessageSquare, Youtube } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
@@ -12,7 +12,7 @@ import { toast } from 'sonner';
 export function Footer() {
   const pathname = usePathname();
   const [email, setEmail] = useState('');
-  const [subscribed, setSubscribed] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   // Omit on admin routes
   if (pathname.startsWith('/admin')) {
@@ -25,9 +25,14 @@ export function Footer() {
       toast.error('Please enter a valid email address');
       return;
     }
-    setSubscribed(true);
-    toast.success('Thank you for subscribing to Circuitly weekly digests!');
-    setEmail('');
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+      toast.success('Subscribed!', {
+        description: 'You will receive weekly verified circuit tips every Friday.',
+      });
+      setEmail('');
+    }, 400);
   };
 
   return (
@@ -45,7 +50,7 @@ export function Footer() {
             </p>
             <div className="flex items-center space-x-2.5 pt-2">
               <a
-                href="https://github.com"
+                href="https://github.com/mrsouvick/circuitly"
                 target="_blank"
                 rel="noreferrer"
                 aria-label="GitHub"
@@ -54,22 +59,31 @@ export function Footer() {
                 <Github className="h-4 w-4" />
               </a>
               <a
-                href="https://twitter.com"
+                href="https://twitter.com/circuitly_io"
                 target="_blank"
                 rel="noreferrer"
-                aria-label="Twitter"
+                aria-label="Twitter / X"
                 className="h-9 w-9 rounded-full border border-[#E2E8F0] bg-white flex items-center justify-center text-[#64748B] hover:text-[#2563EB] hover:border-[#2563EB] shadow-sm hover:-translate-y-0.5 transition-all duration-200"
               >
                 <Twitter className="h-4 w-4" />
               </a>
               <a
-                href="https://discord.com"
+                href="https://discord.gg/circuitly"
                 target="_blank"
                 rel="noreferrer"
                 aria-label="Discord"
                 className="h-9 w-9 rounded-full border border-[#E2E8F0] bg-white flex items-center justify-center text-[#64748B] hover:text-[#2563EB] hover:border-[#2563EB] shadow-sm hover:-translate-y-0.5 transition-all duration-200"
               >
                 <MessageSquare className="h-4 w-4" />
+              </a>
+              <a
+                href="https://youtube.com/@circuitly"
+                target="_blank"
+                rel="noreferrer"
+                aria-label="YouTube"
+                className="h-9 w-9 rounded-full border border-[#E2E8F0] bg-white flex items-center justify-center text-[#64748B] hover:text-[#2563EB] hover:border-[#2563EB] shadow-sm hover:-translate-y-0.5 transition-all duration-200"
+              >
+                <Youtube className="h-4 w-4" />
               </a>
             </div>
           </div>
@@ -141,10 +155,10 @@ export function Footer() {
           {/* Column 4: Newsletter */}
           <div className="space-y-3.5">
             <h4 className="text-xs font-semibold text-[#0F172A] uppercase tracking-wider">
-              Weekly Maker Digest
+              Get weekly circuit tips
             </h4>
             <p className="text-xs text-[#64748B] leading-relaxed">
-              Receive curated Arduino sketches, new component teardowns, and engineering tips every Friday.
+              Curated Arduino sketches, component teardowns, and engineering tips delivered every Friday.
             </p>
             <form onSubmit={handleSubscribe} className="space-y-2">
               <div className="flex gap-2">
@@ -153,31 +167,36 @@ export function Footer() {
                   placeholder="you@domain.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="h-9 text-xs bg-white border-[#E2E8F0] focus-visible:ring-[#2563EB]"
+                  className="h-10 text-xs bg-white border-[#E2E8F0] focus-visible:ring-[#2563EB] rounded-[10px]"
                   required
                 />
                 <Button
                   type="submit"
-                  size="sm"
-                  className="h-9 px-3 bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded-[10px] shadow-sm"
+                  disabled={loading}
+                  className="h-10 px-3.5 bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded-[10px] shadow-sm text-xs font-semibold gap-1.5 shrink-0"
                 >
                   <Send className="h-3.5 w-3.5" />
+                  <span>{loading ? '...' : 'Subscribe'}</span>
                 </Button>
               </div>
-              {subscribed && (
-                <p className="text-[11px] font-medium text-[#059669]">Subscribed! Check your inbox soon.</p>
-              )}
+              <p className="text-[11px] text-[#94A3B8]">
+                No spam. Unsubscribe anytime in one click.
+              </p>
             </form>
           </div>
         </div>
 
-        {/* Bottom Credits */}
+        {/* Bottom Credits & Attribution */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-[#64748B] gap-4">
-          <p>© {new Date().getFullYear()} Circuitly Platform Inc. Built with Next.js & Supabase.</p>
+          <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 text-center sm:text-left">
+            <p>© 2025 Circuitly. All rights reserved.</p>
+            <span className="hidden sm:inline text-[#CBD5E1]">•</span>
+            <p className="text-[#94A3B8]">Powered by Arduino · Simulated by Wokwi</p>
+          </div>
           <div className="flex items-center space-x-1.5">
-            <span>Crafted with</span>
+            <span>Made with</span>
             <Heart className="h-3.5 w-3.5 text-rose-500 fill-rose-500" />
-            <span>for the global embedded electronics community</span>
+            <span>for makers in India &amp; worldwide</span>
           </div>
         </div>
       </div>

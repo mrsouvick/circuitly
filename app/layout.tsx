@@ -59,12 +59,21 @@ export const metadata: Metadata = {
     title: `${SITE_CONFIG.name} — Learn Arduino by Building`,
     description: SITE_CONFIG.description,
     siteName: SITE_CONFIG.name,
+    images: [
+      {
+        url: '/logo.png',
+        width: 1024,
+        height: 1024,
+        alt: 'Circuitly — Learn Arduino by Building Real Circuits',
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
     title: SITE_CONFIG.name,
     description: SITE_CONFIG.description,
     creator: '@circuitly_io',
+    images: ['/logo.png'],
   },
   manifest: '/manifest.json',
   icons: {
