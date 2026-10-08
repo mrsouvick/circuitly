@@ -3,7 +3,8 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Cpu, Send, Heart, Github, Twitter, MessageSquare } from 'lucide-react';
+import { Logo } from '@/components/shared/Logo';
+import { Send, Heart, Github, Twitter, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
@@ -35,10 +36,8 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 pb-12 border-b border-[#E2E8F0]">
           {/* Column 1: Brand Info & Socials */}
           <div className="space-y-4">
-            <Link href="/" className="flex items-center space-x-2.5">
-              <div className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-[#2563EB] text-white font-bold shadow-sm">
-                <Cpu className="h-5 w-5" />
-              </div>
+            <Link href="/" className="flex items-center space-x-2.5 group">
+              <Logo size={36} />
               <span className="text-xl font-extrabold tracking-tight text-[#0F172A]">Circuitly</span>
             </Link>
             <p className="text-sm text-[#64748B] leading-relaxed">

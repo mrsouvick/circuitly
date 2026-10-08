@@ -7,6 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Cpu, ArrowLeft, MailCheck, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Logo } from '@/components/shared/Logo';
 import { ForgotPasswordSchema, ForgotPasswordFormData } from '@/lib/validations/auth';
 import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
@@ -45,9 +46,7 @@ export default function ForgotPasswordPage() {
       <div className="w-full max-w-[420px] space-y-6">
         <div className="text-center space-y-2">
           <Link href="/" className="inline-flex items-center space-x-2.5 group">
-            <div className="flex h-10 w-10 items-center justify-center rounded-[12px] bg-[#2563EB] text-white shadow-sm transition-transform duration-200 group-hover:scale-105">
-              <Cpu className="h-5 w-5" />
-            </div>
+            <Logo size={42} />
             <span className="text-2xl font-extrabold tracking-tight text-[#0F172A]">Circuitly</span>
           </Link>
           <div className="pt-2">

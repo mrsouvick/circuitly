@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { Logo } from '@/components/shared/Logo';
 
 const ADMIN_SECTIONS = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
@@ -49,10 +50,8 @@ export function AdminSidebar() {
     >
       {/* Brand Header */}
       <div className="flex h-16 items-center justify-between px-4 border-b border-border/60">
-        <Link href="/admin" className="flex items-center space-x-2.5">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#00E5A0] text-black font-bold shadow-md shadow-[#00E5A0]/20">
-            <Cpu className="h-5 w-5" />
-          </div>
+        <Link href="/admin" className="flex items-center space-x-2.5 group">
+          <Logo size={34} />
           {!collapsed && (
             <div className="flex flex-col">
               <span className="font-bold text-sm text-foreground flex items-center gap-1.5">

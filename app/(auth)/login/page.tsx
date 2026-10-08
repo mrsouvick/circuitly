@@ -17,6 +17,7 @@ import {
   Zap,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Logo } from '@/components/shared/Logo';
 import { LoginSchema, LoginFormData } from '@/lib/validations/auth';
 import { useAuth } from '@/components/providers/AuthProvider';
 import { createClient } from '@/lib/supabase/client';
@@ -203,9 +204,7 @@ function StudentLoginForm() {
         {/* TOP LEFT: Brand Logo & Version Badge */}
         <div className="relative z-10 flex items-center space-x-2.5">
           <Link href="/" className="flex items-center space-x-2.5 group">
-            <div className="flex h-10 w-10 items-center justify-center rounded-[10px] bg-[#2563EB] text-white shadow-md shadow-[#2563EB]/25 group-hover:scale-105 transition-transform duration-200">
-              <Cpu className="h-5 w-5 stroke-[2.2]" />
-            </div>
+            <Logo size={40} className="shadow-md shadow-[#2563EB]/25" />
             <div className="flex items-center gap-2">
               <span className="text-xl font-extrabold tracking-tight text-white font-heading">
                 Circuitly
@@ -266,6 +265,16 @@ function StudentLoginForm() {
       <div className="w-full lg:w-[45%] flex flex-col justify-center items-center p-6 sm:p-10 lg:p-12 xl:p-16 bg-[#FFFFFF] min-h-screen relative">
         {/* Form Container (max-width 400px with subtle entry fade-in animation) */}
         <div className="w-full max-w-[400px] space-y-6 animate-in fade-in slide-in-from-bottom-3 duration-500">
+          {/* Mobile Brand Link (visible only on mobile) */}
+          <div className="lg:hidden pb-1">
+            <Link href="/" className="inline-flex items-center space-x-2.5 group">
+              <Logo size={36} />
+              <span className="text-xl font-extrabold tracking-tight text-[#0F172A] font-heading">
+                Circuitly
+              </span>
+            </Link>
+          </div>
+
           {/* Header */}
           <div className="space-y-1.5">
             <p className="text-[12px] uppercase font-semibold text-[#64748B] tracking-[0.1em]">

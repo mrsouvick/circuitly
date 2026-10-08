@@ -15,6 +15,7 @@ import {
   Menu,
   X,
 } from 'lucide-react';
+import { Logo } from '@/components/shared/Logo';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/components/providers/AuthProvider';
 import { cn } from '@/lib/utils';
@@ -41,9 +42,7 @@ export function Navbar() {
       <div className="max-w-[1200px] mx-auto px-6 h-16 flex items-center justify-between">
         {/* Brand Logo */}
         <Link href="/" className="flex items-center space-x-2.5 group">
-          <div className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-[#2563EB] text-white shadow-sm transition-transform duration-200 group-hover:scale-105">
-            <Cpu className="h-5 w-5 stroke-[2]" />
-          </div>
+          <Logo size={36} />
           <div className="flex items-center gap-1.5">
             <span className="text-xl font-extrabold tracking-tight text-[#0F172A]">
               Circuitly
